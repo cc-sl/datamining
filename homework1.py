@@ -25,9 +25,9 @@ plt.rcParams['axes.unicode_minus'] = False
 # 第一阶段：数据预处理
 
 
-print("=" * 80)
+print("")
 print("第一阶段：数据预处理")
-print("=" * 80)
+print("")
 
 # 1. 读取原始数据
 print("\n[1.1] 读取原始数据...")
@@ -35,8 +35,11 @@ df_raw = pd.read_csv('work1/beijing.csv', encoding='gb2312')
 
 # 转换为UTF-8并保存
 df_raw.to_csv('work1/beijing_utf8.csv', encoding='utf-8', index=False)
-print(f"✓ 数据已转换为UTF-8格式，保存至 work1/beijing_utf8.csv")
-print(f"✓ 原始数据形状: {df_raw.shape}")
+print(f" 数据已转换为UTF-8格式，保存至 work1/beijing_utf8.csv")
+print(f" 原始数据形状: {df_raw.shape}")
+
+print(f"\n原始数据预览:")
+print(df_raw.head(3))
 
 # 记录清洗前的统计信息
 stat_before = {
@@ -59,7 +62,7 @@ print("\n[1.2] 任务1：数据清洗...")
 
 # 2.1 删除重复行
 df_clean = df_raw.drop_duplicates().reset_index(drop=True)
-print(f"✓ 删除重复行: 移除 {stat_before['duplicate_rows']} 条重复记录")
+print(f" 删除重复行: 移除 {stat_before['duplicate_rows']} 条重复记录")
 
 # 2.2 处理空列（第一列是索引，删除）
 if '' in df_clean.columns:
@@ -76,7 +79,7 @@ for col in pollutants:
         df_clean[col] = pd.to_numeric(df_clean[col], errors='coerce')
         # 识别异常值（负数）
         if (df_clean[col] < 0).any():
-            print(f"  ⚠ {col} 中存在负值，已处理")
+            print(f"   {col} 中存在负值，已处理")
             df_clean.loc[df_clean[col] < 0, col] = np.nan
 
 # 2.5 缺失值处理 - 分列使用不同策略
@@ -87,7 +90,7 @@ for col in pollutants:
         if missing_count > 0:
             median_val = df_clean[col].median()
             df_clean[col].fillna(median_val, inplace=True)
-            print(f"  ✓ {col} 缺失值({missing_count}个)已用中位数({median_val:.2f})填补")
+            print(f"   {col} 缺失值({missing_count}个)已用中位数({median_val:.2f})填补")
 
 # 对于AQI指数，也使用中位数填补
 if 'AQI指数' in df_clean.columns:
@@ -95,7 +98,7 @@ if 'AQI指数' in df_clean.columns:
         df_clean['AQI指数'].fillna(df_clean['AQI指数'].median(), inplace=True)
 
 # 2.6 一致性检查 - 检查质量等级与AQI的对应关系
-print(f"\n  ✓ 质量等级分布:")
+print(f"\n   质量等级分布:")
 print(f"    {df_clean['质量等级'].value_counts().to_dict()}")
 
 stat_after_clean = {
@@ -118,11 +121,12 @@ if len(df_clean.columns) > 1 and '日期' in df_clean.columns:
     date_col_idx = list(df_clean.columns).index('日期')
     
 df_clean['日期'] = pd.to_datetime(df_clean.iloc[:, 1], format='%Y/%m/%d', errors='coerce')
-print(f"✓ 日期已转换为标准datetime类型")
+print(f" 日期已转换为标准datetime类型")
 
 # 3.2 质量等级分类标准化
 quality_mapping = {
     '优': '优',
+    '优级': '优',
     '良': '良',
     '轻度污染': '轻度污染',
     '中度污染': '中度污染',
@@ -131,14 +135,14 @@ quality_mapping = {
 }
 # 确保所有值都被识别
 unique_qualities = df_clean['质量等级'].unique()
-print(f"✓ 质量等级分类: {sorted(unique_qualities.tolist())}")
+print(f" 质量等级分类: {sorted(unique_qualities.tolist())}")
 
 # 3.3 污染物数据标准化为float类型
 for col in pollutants:
     if col in df_clean.columns:
         df_clean[col] = df_clean[col].astype(float)
 
-print(f"✓ 污染物数据已转换为float类型")
+print(f" 污染物数据已转换为float类型")
 
 # 4. 任务3：时间维度特征衍生工程
 print("\n[1.4] 任务3：时间维度特征衍生工程...")
@@ -204,7 +208,7 @@ def get_workday_type(date):
 
 df_clean['工作日类型'] = df_clean['日期'].apply(get_workday_type)
 
-print(f"✓ 衍生特征已生成:")
+print(f" 衍生特征已生成:")
 print(f"  - 季节: {df_clean['季节'].unique().tolist()}")
 print(f"  - 是否周末: {df_clean['是否周末'].unique().tolist()}")
 print(f"  - 是否法定节假日: {df_clean['是否法定节假日'].unique().tolist()}")
@@ -213,15 +217,15 @@ print(f"  - 工作日类型: {df_clean['工作日类型'].unique().tolist()}")
 
 # 保存预处理后的数据
 df_clean.to_csv('work1/beijing_cleaned.csv', encoding='utf-8', index=False)
-print(f"\n✓ 预处理完成！清洗后数据已保存至 work1/beijing_cleaned.csv")
+print(f"\n 预处理完成！清洗后数据已保存至 work1/beijing_cleaned.csv")
 
 
 # 第二阶段：数据分析
 
 
-print("\n" + "=" * 80)
+print("\n" + "")
 print("第二阶段：数据分析")
-print("=" * 80)
+print("")
 
 # 任务1：统计描述
 print("\n[2.1] 任务1：统计描述...")
@@ -233,7 +237,7 @@ print(stat_desc)
 
 # 保存统计结果
 stat_desc.to_csv('work1/污染物统计描述.csv', encoding='utf-8')
-print(f"✓ 统计描述已保存至 work1/污染物统计描述.csv")
+print(f" 统计描述已保存至 work1/污染物统计描述.csv")
 
 # 任务2：统计发现与深度可视化
 print("\n[2.2] 任务2：统计发现与深度可视化...")
@@ -252,7 +256,7 @@ plt.title('北京空气质量数据 - 污染物相关性热力图', fontsize=14,
 plt.tight_layout()
 plt.savefig('work1/visualizations/01_相关性热力图.png', dpi=300, bbox_inches='tight')
 plt.close()
-print("  ✓ 保存为 work1/visualizations/01_相关性热力图.png")
+print("   保存为 work1/visualizations/01_相关性热力图.png")
 
 # 图2: 季节-污染物时空轨迹图
 print("  生成图2: 季节污染物成分占比分析...")
@@ -267,7 +271,7 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 plt.savefig('work1/visualizations/02_季节污染物成分占比.png', dpi=300, bbox_inches='tight')
 plt.close()
-print("  ✓ 保存为 work1/visualizations/02_季节污染物成分占比.png")
+print("   保存为 work1/visualizations/02_季节污染物成分占比.png")
 
 # 图3: 污染物箱线图
 print("  生成图3: 污染物箱线图...")
@@ -280,7 +284,7 @@ plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('work1/visualizations/03_污染物箱线图.png', dpi=300, bbox_inches='tight')
 plt.close()
-print("  ✓ 保存为 work1/visualizations/03_污染物箱线图.png")
+print("   保存为 work1/visualizations/03_污染物箱线图.png")
 
 # 图4: AQI指数与质量等级的关系
 print("  生成图4: AQI指数与质量等级的关系...")
@@ -295,7 +299,7 @@ plt.ylabel('AQI指数', fontsize=12)
 plt.tight_layout()
 plt.savefig('work1/visualizations/04_AQI指数与质量等级.png', dpi=300, bbox_inches='tight')
 plt.close()
-print("  ✓ 保存为 work1/visualizations/04_AQI指数与质量等级.png")
+print("   保存为 work1/visualizations/04_AQI指数与质量等级.png")
 
 # 图5: 时间序列趋势
 print("  生成图5: 时间序列趋势分析...")
@@ -312,17 +316,17 @@ plt.xticks(rotation=45)
 plt.tight_layout()
 plt.savefig('work1/visualizations/05_时间序列趋势.png', dpi=300, bbox_inches='tight')
 plt.close()
-print("  ✓ 保存为 work1/visualizations/05_时间序列趋势.png")
+print("   保存为 work1/visualizations/05_时间序列趋势.png")
 
-print(f"\n✓ 可视化分析完成！共生成5张图表")
+print(f"\n 可视化分析完成！共生成5张图表")
 
 
 # 第三阶段：数据建模 - 关联规则挖掘
 
 
-print("\n" + "=" * 80)
+print("\n" + "")
 print("第三阶段：数据建模 - 关联规则挖掘")
-print("=" * 80)
+print("")
 
 print("\n[3.1] 数据离散化...")
 
@@ -369,7 +373,7 @@ quality_mapping = {
 }
 df_model['质量等级_离散'] = df_model['质量等级'].map(quality_mapping)
 
-print(f"✓ 数据离散化完成")
+print(f" 数据离散化完成")
 
 print("\n[3.2] Apriori算法关联规则挖掘...")
 
@@ -400,17 +404,17 @@ te = TransactionEncoder()
 te_ary = te.fit(transactions).transform(transactions)
 df_encoded = pd.DataFrame(te_ary, columns=te.columns_)
 
-print(f"✓ 事务数据库构建完成: {df_encoded.shape[0]} 条事务, {df_encoded.shape[1]} 项")
+print(f" 事务数据库构建完成: {df_encoded.shape[0]} 条事务, {df_encoded.shape[1]} 项")
 
 # 运行Apriori算法，调整支持度阈值
 min_support = 0.05  # 5% 的最小支持度
 frequent_itemsets = apriori(df_encoded, min_support=min_support, use_colnames=True)
-print(f"✓ 频繁项集挖掘: {len(frequent_itemsets)} 个频繁项集 (支持度 >= {min_support})")
+print(f" 频繁项集挖掘: {len(frequent_itemsets)} 个频繁项集 (支持度 >= {min_support})")
 
 # 生成关联规则
 if len(frequent_itemsets) > 1:
     rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.5)
-    print(f"✓ 关联规则生成: {len(rules)} 条规则 (置信度 >= 0.5)")
+    print(f" 关联规则生成: {len(rules)} 条规则 (置信度 >= 0.5)")
     
     # 计算提升度并排序
     if len(rules) > 0:
@@ -422,9 +426,9 @@ if len(frequent_itemsets) > 1:
         strong_rules = rules[rules['lift'] > 1.5].sort_values('lift', ascending=False)
         
         print(f"\n强关联规则 (Lift > 1.5): {len(strong_rules)} 条")
-        print("\n" + "=" * 100)
+        print("\n")
         print("前10条强关联规则:")
-        print("=" * 100)
+        print()
         
         for idx, row in strong_rules.head(10).iterrows():
             antecedents = ', '.join(list(row['antecedents']))
@@ -447,19 +451,19 @@ if len(frequent_itemsets) > 1:
         strong_rules_export['consequents'] = strong_rules_export['consequents'].apply(lambda x: ', '.join(list(x)))
         strong_rules_export.to_csv('work1/关联规则_强规则.csv', encoding='utf-8', index=False)
         
-        print(f"\n✓ 关联规则已保存:")
+        print(f"\n 关联规则已保存:")
         print(f"  - 所有规则: work1/关联规则_所有.csv ({len(rules)} 条)")
         print(f"  - 强规则: work1/关联规则_强规则.csv ({len(strong_rules)} 条)")
 else:
-    print("⚠ 未找到足够的频繁项集生成关联规则")
+    print(" 未找到足够的频繁项集生成关联规则")
 
 
 # 数据清洗统计对比表
 
 
-print("\n" + "=" * 80)
+print("\n" + "")
 print("数据清洗统计对比表")
-print("=" * 80)
+print("")
 
 comparison_table = pd.DataFrame({
     '指标': [
@@ -494,15 +498,15 @@ comparison_table = pd.DataFrame({
 
 print("\n" + comparison_table.to_string(index=False))
 comparison_table.to_csv('work1/数据清洗统计对比表.csv', encoding='utf-8', index=False)
-print(f"\n✓ 统计对比表已保存至 work1/数据清洗统计对比表.csv")
+print(f"\n 统计对比表已保存至 work1/数据清洗统计对比表.csv")
 
 
 # 分析总结
 
 
-print("\n" + "=" * 80)
+print("\n" + "")
 print("分析完成总结")
-print("=" * 80)
+print("")
 
 print("\n生成的输出文件:")
 print("  1. work1/beijing_utf8.csv - UTF-8格式原始数据")
@@ -513,14 +517,14 @@ print("  5. work1/关联规则_所有.csv - 所有关联规则")
 print("  6. work1/关联规则_强规则.csv - 强关联规则")
 print("  7. work1/visualizations/ - 可视化图表目录")
 
-print("\n" + "=" * 80)
+print("\n" + "")
 print("所有任务完成！")
-print("=" * 80)
+print("")
 
 # 补充：强关联规则解释与治理建议
-print("\n" + "=" * 80)
+print("\n" + "")
 print("强关联规则解读与空气质量治理建议")
-print("=" * 80)
+print("")
 
 # 规则解读
 print("\n【核心规则解读】")
