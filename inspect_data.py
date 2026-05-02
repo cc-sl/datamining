@@ -1,0 +1,10 @@
+import pandas as pd
+df = pd.read_csv('work1/beijing.csv', encoding='gb2312')
+print('Shape:', df.shape)
+print('\nColumns:', list(df.columns))
+print('\nFirst 3 rows:')
+print(df.head(3))
+print('\nData types:')
+print(df.dtypes)
+print('\nMissing values:')
+print(df.isnull().sum())
